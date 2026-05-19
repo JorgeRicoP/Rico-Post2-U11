@@ -1,30 +1,26 @@
-package com.jorge.post1u11.service;
+package com.jorgerico.post1u11.service;
 
 import com.jorge.post1u11.entity.Pedido;
+import com.jorge.post1u11.strategy.EstrategiaEnvio;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class EnvioService {
 
-    public double calcularEnvio(Pedido pedido, String tipoEnvio) {
+    private final Map<String, EstrategiaEnvio> estrategias;
 
-        switch (tipoEnvio) {
+    public EnvioService(Map<String, EstrategiaEnvio> estrategias) {
+        this.estrategias = estrategias;
+    }
 
-            case "ESTANDAR":
-                return pedido.getTotal() > 50 ? 0 : 5.99;
+    public double calcularEnvio(Pedido pedido, String tipo) {
 
-            case "EXPRESS":
-                return 12.99;
-
-            case "MISMO_DIA":
-                return 24.99;
-
-            case "GRATIS":
-                return 0;
-
-            default:
-                throw new IllegalArgumentException(
-                        "Tipo de envio desconocido: " + tipoEnvio);
-        }
+        return Optional.ofNullable(estrategias.get(tipo))
+                .orElseThrow(() ->
+                        new IllegalArgumentException(tipo))
+                .calcularCosto(pedido);
     }
 }
